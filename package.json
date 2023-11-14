@@ -1,0 +1,32 @@
+{
+  "name": "util-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^2.3.2",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@prb/math": "^4.0.1",
+    "ethers": "^5.7.0",
+    "framer-motion": "^7.3.2",
+    "next": "12.3.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-focus-lock": "^2.9.4",
+    "wagmi": "^1.3.10"
+  },
+  "devDependencies": {
+    "@types/node": "18.7.16",
+    "@types/react": "18.0.19",
+    "@types/react-dom": "18.0.6",
+    "eslint": "8.23.1",
+    "eslint-config-next": "12.3.0",
+    "typescript": "5.1.6"
+  }
+}
