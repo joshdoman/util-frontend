@@ -262,24 +262,25 @@ const Home: NextPage = () => {
         }
         </Box>
 
-        <Box w='100%' my={4}>
-          {chainId && !isSepolia ?
+        
+        {chainId && !isSepolia ?
+          <Box w='100%' my={4}>
             <Alert status='warning'>
               <AlertIcon />
               Currently available only on Sepolia. Please switch network on Metamask.
             </Alert>
-            : <></>
-          }
-        </Box>
+          </Box>
+          : <></>
+        }
 
-        <Box w='100%' my={4}>
           {chainId && !isSepolia ?
-            <Button type="button" onClick={onSwitchToSepolia}>
-              Switch to Sepolia
-            </Button>
+            <Box w='100%' my={4}>
+              <Button type="button" onClick={onSwitchToSepolia}>
+                Switch to Sepolia
+              </Button>
+            </Box>
             : <></>
           }
-        </Box>
 
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Overview</Heading>
