@@ -37,8 +37,8 @@ export default function Convert(props:Props){
   const token0Symbol = props.token0Symbol;
   const token1Symbol = props.token1Symbol;
   const currentAccount = props.currentAccount;
-  const token0Balance = Number(props.token0Balance?.formatted ?? '0');
-  const token1Balance = Number(props.token1Balance?.formatted ?? '0');
+  const token0Balance = Number(props.token0Balance ?? '0'); // Number(props.token0Balance?.formatted ?? '0');
+  const token1Balance = Number(props.token1Balance ?? '0'); // Number(props.token1Balance?.formatted ?? '0');
   
   const [inputType, setInputType] = React.useState('1')
   const [outputType, setOutputType] = React.useState('0')

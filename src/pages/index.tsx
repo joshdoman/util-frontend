@@ -10,16 +10,19 @@ import Overview from 'components/Overview'
 import ClaimTokens from 'components/ClaimTokens'
 import Convert from 'components/Convert'
 import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
+import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
 import Transfer from 'components/Transfer'
+import { formatEther, parseEther } from 'ethers/lib/utils'
 
 declare let window: any
 
 const Home: NextPage = () => {
   const [balance, setBalance] = useState<string | undefined>()
+  const [token0Balance, setToken0Balance] = useState<string | undefined>()
+  const [token1Balance, setToken1Balance] = useState<string | undefined>()
   const [currentAccount, setCurrentAccount] = useState<`0x${string}` | undefined>()
   const [chainId, setChainId] = useState<number | undefined>()
   const [chainname, setChainName] = useState<string | undefined>()
-  const [basePrice, setBasePrice] = useState<number | undefined>()
 
   useEffect(() => {
     if(!window.ethereum) return
@@ -127,20 +130,20 @@ const Home: NextPage = () => {
   const token0Symbol = 'TIGHTEN'
   const token1Symbol = 'EASE'
 
-  const { data: baseBalance } = useBalance({
-    address: currentAccount as `0x${string}` | undefined,
-    watch: true,
-  })
-  const { data: token0Balance } = useBalance({
-    address: currentAccount as `0x${string}` | undefined,
-    token: token0 as `0x${string}`,
-    watch: true,
-  })
-  const { data: token1Balance } = useBalance({
-    address: currentAccount as `0x${string}` | undefined,
-    token: token1 as `0x${string}`,
-    watch: true,
-  })
+  // const { data: baseBalance } = useBalance({
+  //   address: currentAccount as `0x${string}` | undefined,
+  //   watch: true,
+  // })
+  // const { data: token0Balance } = useBalance({
+  //   address: currentAccount as `0x${string}` | undefined,
+  //   token: token0 as `0x${string}`,
+  //   watch: true,
+  // })
+  // const { data: token1Balance } = useBalance({
+  //   address: currentAccount as `0x${string}` | undefined,
+  //   token: token1 as `0x${string}`,
+  //   watch: true,
+  // })
 
   const [accumulator,setAccumulator]=useState<number | undefined>()
   const [quote,setQuote]=useState<number | undefined>()
@@ -191,6 +194,53 @@ const Home: NextPage = () => {
     setToken0Supply(Number(ethers.utils.formatEther(reserve0)));
     setToken1Supply(Number(ethers.utils.formatEther(reserve1)));
     setBlockTimestampLast(blockTimestampLast);
+  }
+
+  useEffect(() => {
+    if(!window.ethereum) return;
+    if(!token0 || !token1 || !currentAccount) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const token0Contract = new ethers.Contract(token0, erc20ABI, provider);
+    const token1Contract = new ethers.Contract(token0, erc20ABI, provider);
+
+    const transferTo = token0Contract.filters.Transfer(undefined, currentAccount);
+    provider.on(transferTo, (from, to, value, event) => {
+        console.log('Transfer', { from, to, value, event })
+        queryToken0Balance()
+    });
+
+    const transferFrom = token1Contract.filters.Transfer(currentAccount, undefined);
+    provider.on(transferTo, (from, to, value, event) => {
+        console.log('Transfer', { from, to, value, event })
+        queryToken1Balance()
+    });
+
+    queryToken0Balance();
+    queryToken1Balance();
+
+    // remove listener when the component is unmounted
+    return () => {
+      provider.removeAllListeners(transferTo)
+      provider.removeAllListeners(transferFrom)
+    }
+  }, [token0, token1, currentAccount])
+
+  async function queryToken0Balance() {
+    if(!window.ethereum) return;
+    if(!token0 || !currentAccount) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const erc20Contract = new ethers.Contract(token0, erc20ABI, provider);
+    const token0Balance = await erc20Contract.balanceOf(currentAccount);
+    setToken0Balance(formatEther(token0Balance));
+  }
+
+  async function queryToken1Balance() {
+    if(!window.ethereum) return;
+    if(!token1 || !currentAccount) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const erc20Contract = new ethers.Contract(token1, erc20ABI, provider);
+    const token1Balance = await erc20Contract.balanceOf(currentAccount);
+    setToken1Balance(formatEther(token1Balance));
   }
 
   return (

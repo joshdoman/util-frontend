@@ -21,8 +21,8 @@ declare let window: any;
 export default function ClaimTokens(props:Props) {
   const peerFedContract = props.peerFedContract;
   const currentAccount = props.currentAccount;
-  const token0Balance = Number(props.token0Balance?.formatted ?? '0');
-  const token1Balance = Number(props.token1Balance?.formatted ?? '0');
+  const token0Balance = Number(props.token0Balance ?? '0');
+  const token1Balance = Number(props.token1Balance ?? '0');
   const token0Symbol = props.token0Symbol;
   const token1Symbol = props.token1Symbol;
 
