@@ -85,12 +85,12 @@ export default function Convert(props:Props){
         var inputReserve = inputType == '0' ? reserve0 : reserve1;
         var outputReserve = inputType == '0' ? reserve1 : reserve0;
 
-        const amountIn = parseEther(Number(debouncedInput).toFixed(18));
+        const amountIn = parseEther(debouncedInput);
         const library = new ethers.Contract(libraryContract, libraryABI, provider);
         const amountOut = await library.getAmountOut(amountIn, inputReserve, outputReserve);
 
         if (amountOut) {
-          setOutput(ethers.utils.formatEther(amountOut))
+          setOutput(ethers.utils.formatEther(amountOut));
 
           if (outputReserve.gt(0)) {
             const quote = amountIn.mul(inputReserve).div(outputReserve);
@@ -256,6 +256,7 @@ export default function Convert(props:Props){
 
   let inputSymbol: string = inputType == '0' ? token0Symbol : token1Symbol;
   let outputSymbol: string = inputType == '0' ? token1Symbol : token0Symbol;
+  let inputBalanceStr: string = inputType == '0' ? props.token0Balance : props.token1Balance;
   let inputBalance: number = inputType == '0' ? token0Balance : token1Balance;
   let outputBalance: number = inputType == '0' ? token1Balance : token0Balance;
 
@@ -287,7 +288,10 @@ export default function Convert(props:Props){
         </InputGroup>
         <Stack direction='row'>
           {/* <Text align='left' fontSize='12' as='i' hidden={!inputValue}>${numberWithCommas(inputValue, 2)}</Text> */}
-          <Text align='right' fontSize='12' flexGrow="1">Balance: {inputBalance.toFixed(4)}</Text>
+          <Text align='right' fontSize='12' flexGrow="1">
+            Balance: {inputBalance.toFixed(4)}
+            <Button onClick={() => setInput(inputBalanceStr)} hidden={inputBalance == 0} colorScheme='blue' size='xs' variant='link' marginLeft={1}>max</Button>
+          </Text>
         </Stack>
         {invalidInput}
         <FormLabel htmlFor='amount'>Output: </FormLabel>
@@ -308,7 +312,7 @@ export default function Convert(props:Props){
         {invalidOutput}
         {slippageComponent}
         {deadlineComponent}
-        <Button type="submit" isDisabled={!currentAccount || !output} isLoading={isSwapping} loadingText='Swapping'>Swap</Button>
+        <Button type="submit" isDisabled={!currentAccount || !output || Number(input) > inputBalance} isLoading={isSwapping} loadingText='Swapping'>Swap</Button>
         <Button onClick={handleAdvancedToggleChange} colorScheme='gray' size='sm' variant='link' marginLeft='4'>{advancedToggleText}</Button>
       </FormControl>
       </form>
