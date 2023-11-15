@@ -216,13 +216,13 @@ const Home: NextPage = () => {
     });
 
     const token0From = token0Contract.filters.Transfer(currentAccount, undefined);
-    provider.on(token0To, (from, to, value, event) => {
+    provider.on(token0From, (from, to, value, event) => {
         console.log('Transfer', { from, to, value, event })
         queryToken0Balance()
     });
 
     const token1From = token1Contract.filters.Transfer(currentAccount, undefined);
-    provider.on(token1To, (from, to, value, event) => {
+    provider.on(token1From, (from, to, value, event) => {
         console.log('Transfer', { from, to, value, event })
         queryToken1Balance()
     });
