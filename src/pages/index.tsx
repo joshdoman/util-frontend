@@ -201,16 +201,28 @@ const Home: NextPage = () => {
     if(!token0 || !token1 || !currentAccount) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const token0Contract = new ethers.Contract(token0, erc20ABI, provider);
-    const token1Contract = new ethers.Contract(token0, erc20ABI, provider);
+    const token1Contract = new ethers.Contract(token1, erc20ABI, provider);
 
-    const transferTo = token0Contract.filters.Transfer(undefined, currentAccount);
-    provider.on(transferTo, (from, to, value, event) => {
+    const token0To = token0Contract.filters.Transfer(undefined, currentAccount);
+    provider.on(token0To, (from, to, value, event) => {
         console.log('Transfer', { from, to, value, event })
         queryToken0Balance()
     });
 
-    const transferFrom = token1Contract.filters.Transfer(currentAccount, undefined);
-    provider.on(transferTo, (from, to, value, event) => {
+    const token1To = token1Contract.filters.Transfer(undefined, currentAccount);
+    provider.on(token1To, (from, to, value, event) => {
+        console.log('Transfer', { from, to, value, event })
+        queryToken1Balance()
+    });
+
+    const token0From = token0Contract.filters.Transfer(currentAccount, undefined);
+    provider.on(token0To, (from, to, value, event) => {
+        console.log('Transfer', { from, to, value, event })
+        queryToken0Balance()
+    });
+
+    const token1From = token1Contract.filters.Transfer(currentAccount, undefined);
+    provider.on(token1To, (from, to, value, event) => {
         console.log('Transfer', { from, to, value, event })
         queryToken1Balance()
     });
@@ -220,8 +232,10 @@ const Home: NextPage = () => {
 
     // remove listener when the component is unmounted
     return () => {
-      provider.removeAllListeners(transferTo)
-      provider.removeAllListeners(transferFrom)
+      provider.removeAllListeners(token0To)
+      provider.removeAllListeners(token1To)
+      provider.removeAllListeners(token0From)
+      provider.removeAllListeners(token1From)
     }
   }, [token0, token1, currentAccount])
 
