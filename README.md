@@ -1,4 +1,4 @@
-This is a frontend to interact with a Solidity implementation of [the Util protocol](https://github.com/joshdoman/peerfed-solidity). A testnet version on Sepolia is available at [https://sepolia.theutil.org](https://sepolia.theutil.org). 
+A frontend for interacting with a Solidity implementation of [the PeerFed protocol](https://github.com/joshdoman/peerfed-solidity). A testnet version on Sepolia is available at [https://sepolia.theutil.org](https://sepolia.theutil.org). A version deployed on Rootstock is under development.
 
 ## Getting Started
 
