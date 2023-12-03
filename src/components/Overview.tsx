@@ -51,7 +51,7 @@ export default function Overview(props:Props) {
       </Flex>
       <Text marginTop='8' as='i' fontSize='sm'>E-bonds per BTC grows at the current interest rate</Text>
       <br/>
-      <Text as='i' fontSize='sm'>Utils per e-bond = 1 / (average interest rate over the preceding hour)</Text>
+      <Text as='i' fontSize='sm'>Utils per e-bond = 1 / (average interest rate over the preceding 8 hours)</Text>
     </div>
   )
 }

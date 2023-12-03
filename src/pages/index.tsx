@@ -121,14 +121,14 @@ const Home: NextPage = () => {
   }
 
   const isSepolia = chainId == sepolia.id
-  const peerfed = isSepolia ? '0x40bE7cA221F243d73cb4E48a67edC49cc6810779' : ''
-  const token0 = isSepolia ? '0x80FC26F040f8eC8118d98b44D1a1d3a4a43C1435' : ''
-  const token1 = isSepolia ? '0xf97B1caC77B589C2C549862FfCCdB86Fffd97382' : ''
-  const library = isSepolia ? '0x3F0aB7Af43162090963837d9fDD74Cc2D96546e5' : ''
+  const peerfed = isSepolia ? '0x92EBA8C8F152971Ff404e47A06335e5D93a2a93C' : ''
+  const token0 = isSepolia ? '0x2e8C395198DcDCa46bDE4c7942058eBFFE18A9d5' : ''
+  const token1 = isSepolia ? '0x356725760646C746197a023EBCb40A33d5Ab2f41' : ''
+  const library = isSepolia ? '0x1E7781eE82520a8F91d39D93C552872E9da02679' : ''
 
   const baseSymbol = 'BTC'
-  const token0Symbol = 'TIGHTEN'
-  const token1Symbol = 'EASE'
+  const token0Symbol = 'Tighten'
+  const token1Symbol = 'Ease'
 
   // const { data: baseBalance } = useBalance({
   //   address: currentAccount as `0x${string}` | undefined,
@@ -181,7 +181,7 @@ const Home: NextPage = () => {
     const accumulator = await peerfedContract.latestAccumulator();
     const quote = await peerfedContract.quote();
     const interestRate = await peerfedContract.interestRate();
-    const checkpointInterestRate = await peerfedContract.checkpointInterestRate();
+    const checkpoint = await peerfedContract.currentCheckpoint();
     const reserves = await peerfedContract.getReserves();
     const reserve0 = reserves._reserve0;
     const reserve1 = reserves._reserve1;
@@ -190,7 +190,7 @@ const Home: NextPage = () => {
     setAccumulator(Number(ethers.utils.formatEther(accumulator)));
     setQuote(Number(ethers.utils.formatEther(quote)));
     setInterestRate(Number(ethers.utils.formatEther(interestRate)));
-    setCheckpointInterestRate(Number(ethers.utils.formatEther(checkpointInterestRate)));
+    setCheckpointInterestRate(Number(ethers.utils.formatEther(checkpoint.interestRate)));
     setToken0Supply(Number(ethers.utils.formatEther(reserve0)));
     setToken1Supply(Number(ethers.utils.formatEther(reserve1)));
     setBlockTimestampLast(blockTimestampLast);
@@ -312,16 +312,6 @@ const Home: NextPage = () => {
           />
         </Box>
 
-        {/* <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
-          <Heading my={4}  fontSize='xl'>Transfer Bitcoin</Heading>
-          <Transfer
-            peerFedContract={peerfed}
-            currentAccount={currentAccount}
-            baseBalance={baseBalance}
-            quote={quote}
-          />
-        </Box> */}
-
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Swap</Heading>
           <Convert
@@ -336,7 +326,7 @@ const Home: NextPage = () => {
         </Box>
 
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
-          <Heading my={4}  fontSize='xl'>Mint Tokens</Heading>
+          <Heading my={4}  fontSize='xl'>Auction</Heading>
           <ClaimTokens
             peerFedContract={peerfed}
             currentAccount={currentAccount}
@@ -344,6 +334,16 @@ const Home: NextPage = () => {
             token1Balance={token1Balance}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
+            gasSymbol={'SepoliaETH'}
+          />
+        </Box>
+
+        <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
+          <Heading my={4}  fontSize='xl'>Transfer Utils</Heading>
+          <Transfer
+            peerFedContract={peerfed}
+            currentAccount={currentAccount}
+            quote={quote}
           />
         </Box>
       </VStack>

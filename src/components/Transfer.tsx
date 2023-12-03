@@ -1,11 +1,9 @@
 // src/component/TransferERC20.tsx
 import React, { useEffect, useState } from 'react'
-import {Alert, AlertDescription, AlertIcon, Box, Button, CloseButton, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
+import {Alert, AlertIcon, Button, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
 import {BigNumber, ethers} from 'ethers'
 import {formatEther, isAddress, parseEther} from 'ethers/lib/utils'
-import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
 import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
-import { PeerFedLibraryExternalABI as libraryABI } from 'abi/PeerFedLibraryExternalABI'
 import { TransactionResponse,TransactionReceipt } from "@ethersproject/abstract-provider"
 import { useDisclosure } from '@chakra-ui/react'
 import {
@@ -17,12 +15,10 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react'
-import { format } from 'path'
 
 interface Props {
     peerFedContract: string,
     currentAccount: string | undefined,
-    baseBalance: any,
     quote: number | undefined,
 }
 
@@ -31,7 +27,6 @@ declare let window: any;
 export default function Convert(props:Props){
   const peerFedContract = props.peerFedContract;
   const currentAccount = props.currentAccount;
-  const baseBalance = Number(props.baseBalance?.formatted ?? '0');
   var quote = props.quote;
   
   const [inputType, setInputType] = React.useState<string>('0')
@@ -41,11 +36,25 @@ export default function Convert(props:Props){
   const [slippageTolerance,setSlippageTolerance]=useState<string>('0.10')
   const [deadline,setDeadline]=useState<string>('10')
   const [isInvalidInput, setIsInvalidInput]=useState<boolean>(false)
+  const [baseBalance, setBaseBalance]=useState<number>(0)
 
   const [isTransferring, setisTransferring]=useState<boolean>(false)
   const { isOpen: isOpenModal, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
 
   var maxBTCAmount = (Number(input) / (quote ?? 1) / (1 - Number(slippageTolerance) / 100));
+
+  useEffect(() => {
+    queryBalance();
+  }, [currentAccount])
+
+  async function queryBalance() {
+    if(!window.ethereum) return;
+    if(!currentAccount) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = await provider.getBalance(currentAccount);
+    console.log(balance);
+    setBaseBalance(Number(formatEther(balance)));
+  }
 
   async function transfer() {
     if(!window.ethereum) return
@@ -70,17 +79,16 @@ export default function Convert(props:Props){
         const maxValue = parseEther(maxBTCAmount.toFixed(18));
         const gasMargin = 1.1;
         const gasEstimated = await peerfed.estimateGas.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue });
-        console.log(gasEstimated);
         tr = await peerfed.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue, gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
       } else {
         const gasEstimated = await signer.sendTransaction({ to: toAddress, value: inputAmount });
-        console.log(gasEstimated);
         tr = await signer.sendTransaction({ to: toAddress, value: inputAmount })
       }
       setisTransferring(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
       console.log("transfer receipt",receipt);
+      queryBalance();
       clearAmounts();
       onCloseModal();
     } catch (e:any) {
@@ -144,7 +152,7 @@ export default function Convert(props:Props){
   let balance: number;
   let symbol: string;
   if (inputType == '0') {
-    symbol = 'units';
+    symbol = 'utils';
     balance = quote ? baseBalance * quote : 0;
   } else {
     symbol = 'BTC';
@@ -158,14 +166,13 @@ export default function Convert(props:Props){
         onOpenModal();
       }}>
       <FormControl>
-        <FormLabel>Denomination: </FormLabel>
+        {/* <FormLabel>Denomination: </FormLabel>
         <RadioGroup onChange={onInputTypeChange} value={inputType}>
           <Stack marginBottom='2' direction='row'>
-            <Radio value='0'>Units</Radio>
-            {/* <Radio value='1'>Bonds</Radio> */}
+            <Radio value='0'>Utils</Radio>
             <Radio value='1'>BTC</Radio>
           </Stack>
-        </RadioGroup>
+        </RadioGroup> */}
         <FormLabel htmlFor='amount'>Amount: </FormLabel>
         <InputGroup>
         <NumberInput value={input} min={0} w='100%' onChange={handleInputChange}>

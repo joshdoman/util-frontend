@@ -25,25 +25,6 @@ export const PeerFedABI = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "checkpointInterestRate",
-        "type": "uint64"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint128",
-        "name": "checkpointAccumulator",
-        "type": "uint128"
-      }
-    ],
-    "name": "Checkpoint",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "to",
@@ -63,6 +44,25 @@ export const PeerFedABI = [
       }
     ],
     "name": "Mint",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "checkpointInterestRate",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128",
+        "name": "checkpointAccumulator",
+        "type": "uint128"
+      }
+    ],
+    "name": "NewCheckpoint",
     "type": "event"
   },
   {
@@ -161,6 +161,19 @@ export const PeerFedABI = [
   },
   {
     "inputs": [],
+    "name": "NUM_SAVED_CHECKPOINTS",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "SECONDS_PER_CHECKPOINT",
     "outputs": [
       {
@@ -200,70 +213,104 @@ export const PeerFedABI = [
   },
   {
     "inputs": [],
-    "name": "checkpointAccumulator",
-    "outputs": [
-      {
-        "internalType": "uint128",
-        "name": "",
-        "type": "uint128"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "checkpointCounter",
-    "outputs": [
-      {
-        "internalType": "uint32",
-        "name": "",
-        "type": "uint32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "checkpointInterestRate",
-    "outputs": [
-      {
-        "internalType": "uint64",
-        "name": "",
-        "type": "uint64"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "checkpointTimestampLast",
-    "outputs": [
-      {
-        "internalType": "uint32",
-        "name": "",
-        "type": "uint32"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "bid",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "checkpoints",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "accumulator",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint64",
+        "name": "interestRate",
+        "type": "uint64"
+      },
+      {
         "internalType": "uint32",
-        "name": "timestamp",
+        "name": "blocktime",
         "type": "uint32"
       }
     ],
-    "name": "expectedCheckpointInterestRate",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentBid",
     "outputs": [
       {
-        "internalType": "uint64",
-        "name": "expectedInterestRate",
-        "type": "uint64"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentBidder",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentCheckpoint",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint128",
+            "name": "accumulator",
+            "type": "uint128"
+          },
+          {
+            "internalType": "uint64",
+            "name": "interestRate",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint32",
+            "name": "blocktime",
+            "type": "uint32"
+          }
+        ],
+        "internalType": "struct IPeerFed.Checkpoint",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentCheckpointID",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
       }
     ],
     "stateMutability": "view",
@@ -326,12 +373,12 @@ export const PeerFedABI = [
   },
   {
     "inputs": [],
-    "name": "lastAccumulatorResetTimestamp",
+    "name": "lastAccumulatorResetAt",
     "outputs": [
       {
-        "internalType": "uint128",
+        "internalType": "uint96",
         "name": "",
-        "type": "uint128"
+        "type": "uint96"
       }
     ],
     "stateMutability": "view",
@@ -351,14 +398,8 @@ export const PeerFedABI = [
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "mintTo",
+    "inputs": [],
+    "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -555,7 +596,7 @@ export const PeerFedABI = [
       },
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "utils",
         "type": "uint256"
       },
       {
