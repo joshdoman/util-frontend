@@ -1,7 +1,7 @@
 // src/pages/index.tsx
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useBalance, sepolia } from 'wagmi'
+import { sepolia } from 'wagmi'
 import { VStack, Heading, Box } from "@chakra-ui/layout"
 import { Alert, AlertIcon, Text, Button } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
@@ -12,7 +12,7 @@ import Convert from 'components/Convert'
 import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
 import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
 import Transfer from 'components/Transfer'
-import { formatEther, parseEther } from 'ethers/lib/utils'
+import { formatEther } from 'ethers/lib/utils'
 
 declare let window: any
 
@@ -121,29 +121,13 @@ const Home: NextPage = () => {
   }
 
   const isSepolia = chainId == sepolia.id
-  const peerfed = isSepolia ? '0x92EBA8C8F152971Ff404e47A06335e5D93a2a93C' : ''
-  const token0 = isSepolia ? '0x2e8C395198DcDCa46bDE4c7942058eBFFE18A9d5' : ''
-  const token1 = isSepolia ? '0x356725760646C746197a023EBCb40A33d5Ab2f41' : ''
-  const library = isSepolia ? '0x1E7781eE82520a8F91d39D93C552872E9da02679' : ''
+  const peerfed = isSepolia ? '0x5633553e1f730B5AFE55d644AF189585Cb1c80ec' : ''
+  const token0 = isSepolia ? '0xfd84Fa3Eee9fB8F0d89Ca6c7EE1E60e2d8C6291e' : ''
+  const token1 = isSepolia ? '0xb9D01DfBD5686Fa812df33d48B44ba38498006E5' : ''
+  const library = isSepolia ? '0x34af180b09B640028BB0983BCd75EFdF61fF331D' : ''
 
-  const baseSymbol = 'BTC'
   const token0Symbol = 'Tighten'
   const token1Symbol = 'Ease'
-
-  // const { data: baseBalance } = useBalance({
-  //   address: currentAccount as `0x${string}` | undefined,
-  //   watch: true,
-  // })
-  // const { data: token0Balance } = useBalance({
-  //   address: currentAccount as `0x${string}` | undefined,
-  //   token: token0 as `0x${string}`,
-  //   watch: true,
-  // })
-  // const { data: token1Balance } = useBalance({
-  //   address: currentAccount as `0x${string}` | undefined,
-  //   token: token1 as `0x${string}`,
-  //   watch: true,
-  // })
 
   const [accumulator,setAccumulator]=useState<number | undefined>()
   const [quote,setQuote]=useState<number | undefined>()
@@ -330,8 +314,6 @@ const Home: NextPage = () => {
           <ClaimTokens
             peerFedContract={peerfed}
             currentAccount={currentAccount}
-            token0Balance={token0Balance}
-            token1Balance={token1Balance}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
             gasSymbol={'SepoliaETH'}

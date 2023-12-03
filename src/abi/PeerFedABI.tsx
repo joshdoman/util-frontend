@@ -5,6 +5,76 @@ export const PeerFedABI = [
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "ExcessiveInputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Expired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientBid",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientFunds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientOutputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidK",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTo",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LibraryExcessiveInputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LibraryExcessiveOutputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LibraryInsufficientInputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LibraryInsufficientOutputAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Locked",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MintUnavailable",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Overflow",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -16,9 +86,33 @@ export const PeerFedABI = [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "TransferFailed",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [],
     "name": "AccumulatorReset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "bidder",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "bid",
+        "type": "uint256"
+      }
+    ],
+    "name": "Bid",
     "type": "event"
   },
   {
@@ -193,6 +287,19 @@ export const PeerFedABI = [
         "internalType": "uint128",
         "name": "",
         "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SECONDS_UNTIL_BIDS_EXPIRE",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
       }
     ],
     "stateMutability": "view",
