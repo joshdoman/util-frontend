@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a frontend to interact with a Solidity implementation of [the Util protocol](https://github.com/joshdoman/peerfed-solidity). A testnet version on Sepolia is available at [https://sepolia.theutil.org](https://sepolia.theutil.org). 
 
 ## Getting Started
 
