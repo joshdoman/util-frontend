@@ -1,7 +1,6 @@
 // src/pages/index.tsx
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { sepolia } from 'wagmi'
 import { VStack, Heading, Box } from "@chakra-ui/layout"
 import { Alert, AlertIcon, Text, Button } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
@@ -83,32 +82,32 @@ const Home: NextPage = () => {
     setCurrentAccount(undefined)
   }
 
-  const onSwitchToSepolia = async () => {
-    console.log("Switch to Sepolia")
+  const onSwitchToRootstock = async () => {
+    console.log("Switch to RSK Testnet")
     if(!window.ethereum) return
     try {
-      // Try to switch to Sepolia network
+      // Try to switch to Rootstock network
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0xaa36a7'  }],
+        params: [{ chainId: '0x1F'  }],
       })
     } catch (error:any) {
-      // Sepolia has not been added to MetaMask, so ask user to add it
+      // Rootstock has not been added to MetaMask, so ask user to add it
       if (error.code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0xaa36a7',
-                chainName: 'Sepolia Test Network (Alchemy)',
-                rpcUrls: ['https://eth-sepolia.g.alchemy.com/v2/4aFPOYn3QNfZhlNYrJRhwQ9POhwAjHHb'],
+                chainId: '0x1F',
+                chainName: 'RSK Testnet',
+                rpcUrls: ['https://public-node.testnet.rsk.co/'],
                 nativeCurrency: {
-                    name: "SepoliaETH",
-                    symbol: "SepoliaETH",
+                    name: "tRBTC",
+                    symbol: "tRBTC",
                     decimals: 18
                 },
-                blockExplorerUrls: ["https://sepolia.etherscan.io"]
+                blockExplorerUrls: ["https://explorer.testnet.rsk.co/"]
               },
             ],
           });
@@ -120,11 +119,11 @@ const Home: NextPage = () => {
     }
   }
 
-  const isSepolia = chainId == sepolia.id
-  const peerfed = isSepolia ? '0x5633553e1f730B5AFE55d644AF189585Cb1c80ec' : ''
-  const token0 = isSepolia ? '0xfd84Fa3Eee9fB8F0d89Ca6c7EE1E60e2d8C6291e' : ''
-  const token1 = isSepolia ? '0xb9D01DfBD5686Fa812df33d48B44ba38498006E5' : ''
-  const library = isSepolia ? '0x34af180b09B640028BB0983BCd75EFdF61fF331D' : ''
+  const isRootstock = chainId == 31
+  const peerfed = isRootstock ? '0xC575167Cf8e9a7eC328A4AFD86087247CD6De1f0' : ''
+  const token0 = isRootstock ? '0xaE5266C05dBE1992720c33D64d9246ca1fee697e' : ''
+  const token1 = isRootstock ? '0xDBA921c5cf8651a1fdEd3CF6Ca104ec89DBC45d4' : ''
+  const library = isRootstock ? '0x78477ECf49B261b39ED3925E0E86386C70fE23eC' : ''
 
   const token0Symbol = 'Tighten'
   const token1Symbol = 'Ease'
@@ -261,20 +260,20 @@ const Home: NextPage = () => {
         </Box>
 
         
-        {chainId && !isSepolia ?
+        {chainId && !isRootstock ?
           <Box w='100%' my={4}>
             <Alert status='warning'>
               <AlertIcon />
-              Currently available only on Sepolia. Please switch network on Metamask.
+              Currently available only on Rootstock. Please switch network on Metamask.
             </Alert>
           </Box>
           : <></>
         }
 
-          {chainId && !isSepolia ?
+          {chainId && !isRootstock ?
             <Box w='100%' my={4}>
-              <Button type="button" onClick={onSwitchToSepolia}>
-                Switch to Sepolia
+              <Button type="button" onClick={onSwitchToRootstock}>
+                Switch to Rootstock
               </Button>
             </Box>
             : <></>
@@ -316,7 +315,7 @@ const Home: NextPage = () => {
             currentAccount={currentAccount}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
-            gasSymbol={'SepoliaETH'}
+            gasSymbol={'tRBTC'}
           />
         </Box>
 
