@@ -188,7 +188,6 @@ export default function Convert(props:Props){
         else transfer();
       }}>
       <FormControl>
-        <FormLabel>Denomination: </FormLabel>
         <RadioGroup onChange={onInputTypeChange} value={inputType}>
           <Stack marginBottom='2' direction='row'>
             <Radio value='0'>Utils</Radio>
