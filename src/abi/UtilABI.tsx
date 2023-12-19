@@ -1,4 +1,4 @@
-export const PeerFedABI = [
+export const UtilABI = [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -402,7 +402,7 @@ export const PeerFedABI = [
             "type": "uint32"
           }
         ],
-        "internalType": "struct IPeerFed.Checkpoint",
+        "internalType": "struct IUtil.Checkpoint",
         "name": "",
         "type": "tuple"
       }

@@ -2,10 +2,9 @@
 import React, { useEffect, useState } from 'react'
 import {Alert, AlertDescription, AlertIcon, Box, Button, CloseButton, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
 import {BigNumber, ethers} from 'ethers'
-import {formatEther, parseEther} from 'ethers/lib/utils'
-import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
-import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
-import { PeerFedLibraryExternalABI as libraryABI } from 'abi/PeerFedLibraryExternalABI'
+import {parseEther} from 'ethers/lib/utils'
+import { UtilABI as utilABI } from 'abi/UtilABI'
+import { UtilLibraryExternalABI as libraryABI } from 'abi/UtilLibraryExternalABI'
 import { TransactionResponse,TransactionReceipt } from "@ethersproject/abstract-provider"
 import { useDisclosure } from '@chakra-ui/react'
 import {
@@ -20,7 +19,7 @@ import {
 import { format } from 'path'
 
 interface Props {
-    peerFedContract: string,
+    utilContract: string,
     libraryContract: string,
     token0Symbol: string,
     token1Symbol: string,
@@ -32,7 +31,7 @@ interface Props {
 declare let window: any;
 
 export default function Convert(props:Props){
-  const peerFedContract = props.peerFedContract;
+  const utilContract = props.utilContract;
   const libraryContract = props.libraryContract;
   const token0Symbol = props.token0Symbol;
   const token1Symbol = props.token1Symbol;
@@ -72,13 +71,13 @@ export default function Convert(props:Props){
 
     async function getAmountOut(window:any){
       if(!window.ethereum) return
-      if(!peerFedContract || !libraryContract) return
+      if(!utilContract || !libraryContract) return
       setIsExactInput(true)
       try {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const peerfed = new ethers.Contract(peerFedContract, peerFedABI, provider);
+        const util = new ethers.Contract(utilContract, utilABI, provider);
 
-        const reserves = await peerfed.getReserves();
+        const reserves = await util.getReserves();
         const reserve0 = reserves._reserve0;
         const reserve1 = reserves._reserve1;
 
@@ -153,7 +152,7 @@ export default function Convert(props:Props){
 
   async function convert() {
     if(!window.ethereum) return
-    if(!peerFedContract) return
+    if(!utilContract) return
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
@@ -167,12 +166,12 @@ export default function Convert(props:Props){
       const inputAmount = parseEther(input);
       const minOutputAmount = parseEther(minOutput.toFixed(18));
       const deadline = BigNumber.from(expiry);
-      const peerfed = new ethers.Contract(peerFedContract, peerFedABI, signer);
+      const util = new ethers.Contract(utilContract, utilABI, signer);
 
       try {
         const input0 = inputType == '0';
-        const gasEstimated = await peerfed.estimateGas.swapExactTokensForTokens(input0, inputAmount, minOutputAmount, currentAccount, deadline);
-        const tr: TransactionResponse = await peerfed.swapExactTokensForTokens(input0, inputAmount, minOutputAmount, currentAccount, deadline, { gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
+        const gasEstimated = await util.estimateGas.swapExactTokensForTokens(input0, inputAmount, minOutputAmount, currentAccount, deadline);
+        const tr: TransactionResponse = await util.swapExactTokensForTokens(input0, inputAmount, minOutputAmount, currentAccount, deadline, { gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
         setIsSwapping(true);
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
         const receipt: TransactionReceipt = await tr.wait();

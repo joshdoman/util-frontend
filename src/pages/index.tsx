@@ -8,7 +8,7 @@ import { ethers } from 'ethers'
 import Overview from 'components/Overview'
 import ClaimTokens from 'components/ClaimTokens'
 import Convert from 'components/Convert'
-import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
+import { UtilABI as utilABI } from 'abi/UtilABI'
 import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
 import Transfer from 'components/Transfer'
 import { formatEther } from 'ethers/lib/utils'
@@ -16,19 +16,18 @@ import { formatEther } from 'ethers/lib/utils'
 declare let window: any
 
 const Home: NextPage = () => {
-  const [balance, setBalance] = useState<string | undefined>()
   const [token0Balance, setToken0Balance] = useState<string | undefined>()
   const [token1Balance, setToken1Balance] = useState<string | undefined>()
   const [currentAccount, setCurrentAccount] = useState<`0x${string}` | undefined>()
   const [chainId, setChainId] = useState<number | undefined>()
-  const [chainname, setChainName] = useState<string | undefined>()
+  const [walletInstalled, setWalletInstalled] = useState<boolean>(false)
 
   useEffect(() => {
     if(!window.ethereum) return
+    setWalletInstalled(true);
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getNetwork().then((result)=>{
       setChainId(result.chainId)
-      setChainName(result.name)
     })
 
     window.ethereum.on('chainChanged', (_chainId: any) => window.location.reload())
@@ -39,35 +38,18 @@ const Home: NextPage = () => {
     //client side code
     if(!window.ethereum) return
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-    provider.getBalance(currentAccount).then((result)=>{
-      setBalance(ethers.utils.formatEther(result))
-    })
     provider.getNetwork().then((result)=>{
       setChainId(result.chainId)
-      setChainName(result.name)
     })
 
   },[currentAccount])
 
   const onClickConnect = () => {
-    //client side code
     if(!window.ethereum) {
       console.log("please install MetaMask")
       return
     }
-    /*
-    //change from window.ethereum.enable() which is deprecated
-    //see docs: https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods
-    window.ethereum.request({ method: 'eth_requestAccounts' })
-    .then((accounts:any)=>{
-      if(accounts.length>0) setCurrentAccount(accounts[0])
-    })
-    .catch('error',console.error)
-    */
-
-    //we can do it using ethers.js
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-
     // MetaMask requires requesting permission to connect users accounts
     provider.send("eth_requestAccounts", [])
     .then((accounts)=>{
@@ -78,7 +60,6 @@ const Home: NextPage = () => {
 
   const onClickDisconnect = () => {
     console.log("onClickDisConnect")
-    setBalance(undefined)
     setCurrentAccount(undefined)
   }
 
@@ -101,7 +82,7 @@ const Home: NextPage = () => {
               {
                 chainId: '0x1F',
                 chainName: 'RSK Testnet',
-                rpcUrls: ['https://public-node.testnet.rsk.co/'],
+                rpcUrls: ['https://go.getblock.io/59875196128a469d9a0b0334f9b0ac29'],
                 nativeCurrency: {
                     name: "tRBTC",
                     symbol: "tRBTC",
@@ -120,7 +101,7 @@ const Home: NextPage = () => {
   }
 
   const isRootstock = chainId == 31
-  const peerfed = isRootstock ? '0xC575167Cf8e9a7eC328A4AFD86087247CD6De1f0' : ''
+  const util = isRootstock ? '0xC575167Cf8e9a7eC328A4AFD86087247CD6De1f0' : ''
   const token0 = isRootstock ? '0xaE5266C05dBE1992720c33D64d9246ca1fee697e' : ''
   const token1 = isRootstock ? '0xDBA921c5cf8651a1fdEd3CF6Ca104ec89DBC45d4' : ''
   const library = isRootstock ? '0x78477ECf49B261b39ED3925E0E86386C70fE23eC' : ''
@@ -138,11 +119,11 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     if(!window.ethereum) return;
-    if(!peerfed) return;
+    if(!util) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const peerfedContract = new ethers.Contract(peerfed, peerFedABI, provider);
+    const utilContract = new ethers.Contract(util, utilABI, provider);
 
-    const sync = peerfedContract.filters.Sync();
+    const sync = utilContract.filters.Sync();
     provider.on(sync, (reserve0, reserve1, blockTimestampLast, event) => {
         console.log('Sync', { reserve0, reserve1, blockTimestampLast, event })
         queryData()
@@ -154,18 +135,18 @@ const Home: NextPage = () => {
     return () => {
       provider.removeAllListeners(sync)
     }
-  }, [peerfed])
+  }, [util])
 
   async function queryData() {
     if(!window.ethereum) return;
-    if(!peerfed) return;
+    if(!util) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const peerfedContract = new ethers.Contract(peerfed, peerFedABI, provider);
-    const accumulator = await peerfedContract.latestAccumulator();
-    const quote = await peerfedContract.quote();
-    const interestRate = await peerfedContract.interestRate();
-    const checkpoint = await peerfedContract.currentCheckpoint();
-    const reserves = await peerfedContract.getReserves();
+    const utilContract = new ethers.Contract(util, utilABI, provider);
+    const accumulator = await utilContract.latestAccumulator();
+    const quote = await utilContract.quote();
+    const interestRate = await utilContract.interestRate();
+    const checkpoint = await utilContract.currentCheckpoint();
+    const reserves = await utilContract.getReserves();
     const reserve0 = reserves._reserve0;
     const reserve1 = reserves._reserve1;
     const blockTimestampLast = reserves._blockTimestampLast;
@@ -249,13 +230,17 @@ const Home: NextPage = () => {
       <Heading as="h3"  my={4}>Explore The Util</Heading>
       <VStack>
         <Box w='100%' my={4}>
-        {currentAccount
+        {walletInstalled ? (
+          currentAccount
           ? <Button type="button" w='100%' onClick={onClickDisconnect}>
                 Account:{currentAccount}
             </Button>
           : <Button type="button" w='100%' onClick={onClickConnect}>
                   Connect MetaMask
             </Button>
+        ) : <Button type="button" w='100%' onClick={() => window.open("https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn")}>
+                Install MetaMask
+          </Button>
         }
         </Box>
 
@@ -264,7 +249,7 @@ const Home: NextPage = () => {
           <Box w='100%' my={4}>
             <Alert status='warning'>
               <AlertIcon />
-              Currently available only on Rootstock. Please switch network on Metamask.
+              Currently available only on RSK Testnet. Please switch network on Metamask.
             </Alert>
           </Box>
           : <></>
@@ -273,7 +258,7 @@ const Home: NextPage = () => {
           {chainId && !isRootstock ?
             <Box w='100%' my={4}>
               <Button type="button" onClick={onSwitchToRootstock}>
-                Switch to Rootstock
+                Switch to RSK Testnet
               </Button>
             </Box>
             : <></>
@@ -282,7 +267,6 @@ const Home: NextPage = () => {
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Overview</Heading>
           <Overview
-            peerFedContract={peerfed}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
             accumulator={accumulator}
@@ -298,7 +282,7 @@ const Home: NextPage = () => {
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Swap</Heading>
           <Convert
-            peerFedContract={peerfed}
+            utilContract={util}
             libraryContract={library}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
@@ -311,7 +295,7 @@ const Home: NextPage = () => {
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Auction</Heading>
           <ClaimTokens
-            peerFedContract={peerfed}
+            utilContract={util}
             currentAccount={currentAccount}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
@@ -322,7 +306,7 @@ const Home: NextPage = () => {
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Transfer Utils</Heading>
           <Transfer
-            peerFedContract={peerfed}
+            utilContract={util}
             currentAccount={currentAccount}
             quote={quote}
           />

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import {Alert, AlertIcon, Button, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
 import {BigNumber, ethers} from 'ethers'
 import {formatEther, isAddress, parseEther} from 'ethers/lib/utils'
-import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
+import { UtilABI as utilABI } from 'abi/UtilABI'
 import { TransactionResponse,TransactionReceipt } from "@ethersproject/abstract-provider"
 import { useDisclosure } from '@chakra-ui/react'
 import {
@@ -17,7 +17,7 @@ import {
 } from '@chakra-ui/react'
 
 interface Props {
-    peerFedContract: string,
+    utilContract: string,
     currentAccount: string | undefined,
     quote: number | undefined,
 }
@@ -25,7 +25,7 @@ interface Props {
 declare let window: any;
 
 export default function Convert(props:Props){
-  const peerFedContract = props.peerFedContract;
+  const utilContract = props.utilContract;
   const currentAccount = props.currentAccount;
   var quote = props.quote;
   
@@ -38,9 +38,10 @@ export default function Convert(props:Props){
   const [isInvalidInput, setIsInvalidInput]=useState<boolean>(false)
   const [baseBalance, setBaseBalance]=useState<number>(0)
 
-  const [isTransferring, setisTransferring]=useState<boolean>(false)
+  const [isTransferring, setIsTransferring]=useState<boolean>(false)
   const { isOpen: isOpenModal, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
 
+  const satsPerBTC = 100000000;
   var maxBTCAmount = (Number(input) / (quote ?? 1) / (1 - Number(slippageTolerance) / 100));
 
   useEffect(() => {
@@ -52,13 +53,12 @@ export default function Convert(props:Props){
     if(!currentAccount) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const balance = await provider.getBalance(currentAccount);
-    console.log(balance);
-    setBaseBalance(Number(formatEther(balance)));
+    setBaseBalance(Number(formatEther(balance)) * satsPerBTC);
   }
 
   async function transfer() {
     if(!window.ethereum) return
-    if(!peerFedContract) return
+    if(!utilContract) return
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
@@ -69,22 +69,21 @@ export default function Convert(props:Props){
     // Add 10% margin to gas estimate to ensure sufficient gas
     const inputAmount = parseEther(input);
     const deadlineValue = BigNumber.from(expiry);
-    const peerfed = new ethers.Contract(peerFedContract, peerFedABI, signer);
+    const util = new ethers.Contract(utilContract, utilABI, signer);
 
     try {
       let tr: TransactionResponse;
       if (inputType == '0') {
-        quote = Number(formatEther(await peerfed.quote()));
+        quote = Number(formatEther(await util.quote()));
         maxBTCAmount = Number(input) / (quote ?? 1) / (1 - Number(slippageTolerance) / 100);
-        const maxValue = parseEther(maxBTCAmount.toFixed(18));
+        const maxValue = parseEther(maxBTCAmount.toFixed(18)).div(satsPerBTC);
         const gasMargin = 1.1;
-        const gasEstimated = await peerfed.estimateGas.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue });
-        tr = await peerfed.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue, gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
+        const gasEstimated = await util.estimateGas.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue });
+        tr = await util.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue, gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
       } else {
-        const gasEstimated = await signer.sendTransaction({ to: toAddress, value: inputAmount });
         tr = await signer.sendTransaction({ to: toAddress, value: inputAmount })
       }
-      setisTransferring(true);
+      setIsTransferring(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
       console.log("transfer receipt",receipt);
@@ -94,17 +93,12 @@ export default function Convert(props:Props){
     } catch (e:any) {
       console.error(e);
     } finally {
-      setisTransferring(false)
+      setIsTransferring(false)
     }
   }
 
   function clearAmounts() {
     setInput("")
-    setIsInvalidInput(false)
-  }
-
-  const onInputTypeChange = (value:string) => {
-    setInputType(value)
     setIsInvalidInput(false)
   }
 
@@ -182,7 +176,7 @@ export default function Convert(props:Props){
         </InputGroup>
         <Stack direction='row'>
           {/* <Text align='left' fontSize='12' as='i' hidden={!inputValue}>${numberWithCommas(inputValue, 2)}</Text> */}
-          <Text align='right' fontSize='12' flexGrow="1">Balance: {balance.toFixed(8)}</Text>
+          <Text align='right' fontSize='12' flexGrow="1">Balance: {balance.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
         </Stack>
         <FormLabel htmlFor='amount'>To: </FormLabel>
         <InputGroup marginBottom='4'>
@@ -215,16 +209,16 @@ export default function Convert(props:Props){
                 <>
                 <br/>
                 <Stack marginBottom='2' direction='row'>
-                  <Text align='left'>Expected BTC amount:</Text>
-                  <Text align='right' flexGrow="1">{(Number(input) / (quote ?? 1)).toFixed(4)} BTC</Text>
+                  <Text align='left'>Expected amount of sats:</Text>
+                  <Text align='right' flexGrow="1">{(Number(input) / (quote ?? 1)).toFixed(4)} sats</Text>
                 </Stack>
                 <Stack marginBottom='2' direction='row'>
                   <Text align='left'>Slippage tolerance:</Text>
                   <Text align='right' flexGrow="1">{slippageTolerance}%</Text>
                 </Stack>
                 <Stack marginBottom='2' direction='row'>
-                  <Text align='left'>Maximum BTC amount:</Text>
-                  <Text align='right' flexGrow="1">{maxBTCAmount.toFixed(4)} BTC</Text>
+                  <Text align='left'>Maximum amount of sats:</Text>
+                  <Text align='right' flexGrow="1">{maxBTCAmount.toFixed(4)} sats</Text>
                 </Stack>
                 </>
               )

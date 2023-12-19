@@ -1,4 +1,4 @@
-export const PeerFedLibraryExternalABI = [
+export const UtilLibraryExternalABI = [
   {
     "inputs": [],
     "name": "LibraryExcessiveInputAmount",

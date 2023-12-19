@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react'
 import { Button, NumberInput,  NumberInputField,  FormControl, InputGroup, Text, InputRightAddon } from '@chakra-ui/react'
 import {ethers} from 'ethers'
 import {formatEther, parseEther} from 'ethers/lib/utils'
-import { PeerFedABI as peerFedABI } from 'abi/PeerFedABI'
+import { UtilABI as utilABI } from 'abi/UtilABI'
 import { TransactionResponse,TransactionReceipt } from "@ethersproject/abstract-provider"
 
 interface Props {
-    peerFedContract: string,
+    utilContract: string,
     currentAccount: string | undefined,
     token0Symbol: string,
     token1Symbol: string,
@@ -17,7 +17,7 @@ interface Props {
 declare let window: any;
 
 export default function ClaimTokens(props:Props) {
-  const peerFedContract = props.peerFedContract;
+  const utilContract = props.utilContract;
   const currentAccount = props.currentAccount;
   const token0Symbol = props.token0Symbol;
   const token1Symbol = props.token1Symbol;
@@ -36,32 +36,32 @@ export default function ClaimTokens(props:Props) {
   useEffect(() => {
     queryMintableAmount();
     queryBidder();
-  }, [peerFedContract])
+  }, [utilContract])
 
   async function queryMintableAmount() {
     if(!window.ethereum) return;
-    if(!peerFedContract) return;
+    if(!utilContract) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const peerfed = new ethers.Contract(peerFedContract, peerFedABI, provider);
-    const mintableAmount = await peerfed.mintableAmount();
+    const util = new ethers.Contract(utilContract, utilABI, provider);
+    const mintableAmount = await util.mintableAmount();
     setMintableToken0(Number(formatEther(mintableAmount.newToken0)));
     setMintableToken1(Number(formatEther(mintableAmount.newToken1)));
 
-    const checkpoint = await peerfed.currentCheckpoint();
+    const checkpoint = await util.currentCheckpoint();
     const nextMintDate = new Date((checkpoint.blocktime + 1800) * 1000);
     setNextMintDate(nextMintDate);
   }
 
   async function queryBidder() {
     if(!window.ethereum) return;
-    if(!peerFedContract) return;
+    if(!utilContract) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const peerfed = new ethers.Contract(peerFedContract, peerFedABI, provider);
+    const util = new ethers.Contract(utilContract, utilABI, provider);
 
-    const currentBid = await peerfed.currentBid();
+    const currentBid = await util.currentBid();
     setCurrentBid(Number(formatEther(currentBid)));
 
-    const currentBidder = await peerfed.currentBidder();
+    const currentBidder = await util.currentBidder();
     if (currentBidder != ethers.constants.AddressZero) {
       setCurrentBidder(currentBidder);
     } else {
@@ -71,12 +71,12 @@ export default function ClaimTokens(props:Props) {
 
   async function claim(e:React.FormEvent) {
     e.preventDefault();
-    if (!window.ethereum || !peerFedContract) return;
+    if (!window.ethereum || !utilContract) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const peerfed = new ethers.Contract(peerFedContract, peerFedABI, signer);
+    const util = new ethers.Contract(utilContract, utilABI, signer);
     try {
-      const tr: TransactionResponse = await peerfed.mint();
+      const tr: TransactionResponse = await util.mint();
       setIsEnding(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
@@ -93,13 +93,13 @@ export default function ClaimTokens(props:Props) {
   async function bid(e:React.FormEvent) {
     console.log("bid");
     e.preventDefault();
-    if (!window.ethereum || !peerFedContract) return;
+    if (!window.ethereum || !utilContract) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const peerfed = new ethers.Contract(peerFedContract, peerFedABI, signer);
+    const util = new ethers.Contract(utilContract, utilABI, signer);
     try {
       const value = parseEther(bidAmount);
-      const tr: TransactionResponse = await peerfed.bid({ value: value });
+      const tr: TransactionResponse = await util.bid({ value: value });
       setIsBidding(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();

@@ -3,7 +3,6 @@ import {Box, Flex, Spacer, Text } from '@chakra-ui/react'
 import {ethers} from 'ethers'
 
 interface Props {
-    peerFedContract: string,
     token0Symbol: string,
     token1Symbol: string,
     accumulator: number | undefined,
@@ -44,12 +43,14 @@ export default function Overview(props:Props) {
         <Spacer />
         <Box flexGrow="1">
           <Text as='u'>Accounting</Text>
-          <Text>1 BTC = {accumulatorText}</Text>
+          <Text>1 sat = {accumulatorText}</Text>
           <Text>1 e-bond = {unitsPerBond} </Text>
-          <Text as='b'>1 BTC = {quoteText}</Text>
+          <Text as='b'>1 sat = {quoteText}</Text>
         </Box>
       </Flex>
-      <Text marginTop='8' as='i' fontSize='sm'>E-bonds per BTC grows at the current interest rate</Text>
+      <Text as='i' fontSize='sm'>Interest rate = (Tighten Supply - Ease Supply) / Combined Supply</Text>
+      <br/>
+      <Text as='i' fontSize='sm'>E-bonds per sat grows at the current interest rate</Text>
       <br/>
       <Text as='i' fontSize='sm'>Utils per e-bond = 1 / (average interest rate over the preceding 8 hours)</Text>
     </div>

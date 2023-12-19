@@ -16,7 +16,7 @@ export function Layout(props: Props) {
         {props.children}
       </Container>
       <Center as="footer" bg={useColorModeValue('gray.100', 'gray.700')} p={6}>
-          <Text fontSize="md">Created by Josh Doman - {year}</Text>
+          <Text fontSize="md">MIT License - {year}</Text>
       </Center>
     </div>
   )
