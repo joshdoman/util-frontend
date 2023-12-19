@@ -76,7 +76,7 @@ export default function ClaimTokens(props:Props) {
     const signer = provider.getSigner()
     const util = new ethers.Contract(utilContract, utilABI, signer);
     try {
-      const tr: TransactionResponse = await util.mint();
+      const tr: TransactionResponse = await util.settle();
       setIsEnding(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();

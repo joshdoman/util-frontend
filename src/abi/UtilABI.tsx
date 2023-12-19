@@ -506,13 +506,6 @@ export const UtilABI = [
   },
   {
     "inputs": [],
-    "name": "mint",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "mintableAmount",
     "outputs": [
       {
@@ -540,6 +533,13 @@ export const UtilABI = [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "settle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
