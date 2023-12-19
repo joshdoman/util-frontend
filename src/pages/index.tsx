@@ -304,10 +304,16 @@ const Home: NextPage = () => {
         </Box>
 
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
-          <Heading my={4}  fontSize='xl'>Transfer Utils</Heading>
+          <Heading my={4}  fontSize='xl'>Transfer</Heading>
           <Transfer
             utilContract={util}
+            token0Symbol={token0Symbol}
+            token1Symbol={token1Symbol}
             currentAccount={currentAccount}
+            token0Balance={token0Balance}
+            token1Balance={token1Balance}
+            token0Contract={token0}
+            token1Contract={token1}
             quote={quote}
           />
         </Box>

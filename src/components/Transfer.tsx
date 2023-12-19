@@ -4,6 +4,7 @@ import {Alert, AlertIcon, Button, Input , NumberInput,  NumberInputField,  FormC
 import {BigNumber, ethers} from 'ethers'
 import {formatEther, isAddress, parseEther} from 'ethers/lib/utils'
 import { UtilABI as utilABI } from 'abi/UtilABI'
+import { ERC20ABI as erc20ABI } from 'abi/ERC20ABI'
 import { TransactionResponse,TransactionReceipt } from "@ethersproject/abstract-provider"
 import { useDisclosure } from '@chakra-ui/react'
 import {
@@ -18,7 +19,13 @@ import {
 
 interface Props {
     utilContract: string,
+    token0Symbol: string,
+    token1Symbol: string,
     currentAccount: string | undefined,
+    token0Balance: any,
+    token1Balance: any,
+    token0Contract: string,
+    token1Contract: string,
     quote: number | undefined,
 }
 
@@ -27,6 +34,10 @@ declare let window: any;
 export default function Convert(props:Props){
   const utilContract = props.utilContract;
   const currentAccount = props.currentAccount;
+  const token0Balance = Number(props.token0Balance ?? '0');
+  const token1Balance = Number(props.token1Balance ?? '0');
+  const token0Contract = props.token0Contract;
+  const token1Contract = props.token1Contract;
   var quote = props.quote;
   
   const [inputType, setInputType] = React.useState<string>('0')
@@ -62,26 +73,31 @@ export default function Convert(props:Props){
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-
-    const now = new Date()
-    var expiry = Math.trunc(now.getTime() / 1000) + Number(deadline) * 60
-
-    // Add 10% margin to gas estimate to ensure sufficient gas
     const inputAmount = parseEther(input);
-    const deadlineValue = BigNumber.from(expiry);
-    const util = new ethers.Contract(utilContract, utilABI, signer);
 
     try {
+      // Add 10% margin to gas estimate to ensure sufficient gas
+      const gasMargin = 1.1;
+
       let tr: TransactionResponse;
       if (inputType == '0') {
+        const util = new ethers.Contract(utilContract, utilABI, signer);
+        const now = new Date()
+        var expiry = Math.trunc(now.getTime() / 1000) + Number(deadline) * 60
+        const deadlineValue = BigNumber.from(expiry);
         quote = Number(formatEther(await util.quote()));
         maxBTCAmount = Number(input) / (quote ?? 1) / (1 - Number(slippageTolerance) / 100);
         const maxValue = parseEther(maxBTCAmount.toFixed(18)).div(satsPerBTC);
-        const gasMargin = 1.1;
         const gasEstimated = await util.estimateGas.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue });
         tr = await util.transfer(toAddress, inputAmount, deadlineValue, { value: maxValue, gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
+      } else if (inputType == '1') {
+        const erc20 = new ethers.Contract(token0Contract, erc20ABI, signer);
+        const gasEstimated = await erc20.estimateGas.transfer(toAddress, inputAmount);
+        tr = await erc20.transfer(toAddress, inputAmount, { gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
       } else {
-        tr = await signer.sendTransaction({ to: toAddress, value: inputAmount })
+        const erc20 = new ethers.Contract(token1Contract, erc20ABI, signer);
+        const gasEstimated = await erc20.estimateGas.transfer(toAddress, inputAmount);
+        tr = await erc20.transfer(toAddress, inputAmount, { gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
       }
       setIsTransferring(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
@@ -102,6 +118,10 @@ export default function Convert(props:Props){
     setIsInvalidInput(false)
   }
 
+  function onInputTypeChange(value:string) {
+    setInputType(value);
+  }
+
   const handleInputChange = (value:string) => setInput(value)
   const handleToChange = (event:any) => setToAddress(event.target.value)
   const handleSlippageChange = (value:string) => setSlippageTolerance(value)
@@ -115,7 +135,7 @@ export default function Convert(props:Props){
     </Alert>
   ) : null
 
-  const slippageComponent = showAdvanced ? (
+  const slippageComponent = showAdvanced && inputType == '0' ? (
     <>
       <FormLabel htmlFor='amount'>Slippage tolerance: </FormLabel>
       <InputGroup>
@@ -128,7 +148,7 @@ export default function Convert(props:Props){
     </>
   ) : null;
 
-  const deadlineComponent = showAdvanced ? (
+  const deadlineComponent = showAdvanced && inputType == '0' ? (
     <>
       <FormLabel htmlFor='amount'>Deadline: </FormLabel>
       <InputGroup>
@@ -143,30 +163,39 @@ export default function Convert(props:Props){
 
   const advancedToggleText = showAdvanced ? "Hide advanced" : "Show advanced"
 
-  let balance: number;
+  let balanceText: string;
   let symbol: string;
   if (inputType == '0') {
     symbol = 'utils';
-    balance = quote ? baseBalance * quote : 0;
+    let balance = quote ? baseBalance * quote : 0;
+    balanceText = balance.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  } else if (inputType == '1') {
+    symbol = props.token0Symbol;
+    balanceText = token0Balance.toFixed(4);
+  } else if (inputType == '2') {
+    symbol = props.token1Symbol;
+    balanceText = token1Balance.toFixed(4);
   } else {
-    symbol = 'BTC';
-    balance = baseBalance;
+    symbol = '';
+    balanceText = '';
   }
 
   return (
     <div>
       <form onSubmit={(e:React.FormEvent) => {
         e.preventDefault();
-        onOpenModal();
+        if (inputType == '0') onOpenModal();
+        else transfer();
       }}>
       <FormControl>
-        {/* <FormLabel>Denomination: </FormLabel>
+        <FormLabel>Denomination: </FormLabel>
         <RadioGroup onChange={onInputTypeChange} value={inputType}>
           <Stack marginBottom='2' direction='row'>
             <Radio value='0'>Utils</Radio>
-            <Radio value='1'>BTC</Radio>
+            <Radio value='1'>Tighten</Radio>
+            <Radio value='2'>Ease</Radio>
           </Stack>
-        </RadioGroup> */}
+        </RadioGroup>
         <FormLabel htmlFor='amount'>Amount: </FormLabel>
         <InputGroup>
         <NumberInput value={input} min={0} w='100%' onChange={handleInputChange}>
@@ -175,8 +204,7 @@ export default function Convert(props:Props){
         <InputRightAddon>{symbol}</InputRightAddon>
         </InputGroup>
         <Stack direction='row'>
-          {/* <Text align='left' fontSize='12' as='i' hidden={!inputValue}>${numberWithCommas(inputValue, 2)}</Text> */}
-          <Text align='right' fontSize='12' flexGrow="1">Balance: {balance.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}</Text>
+          <Text align='right' fontSize='12' flexGrow="1">Balance: {balanceText}</Text>
         </Stack>
         <FormLabel htmlFor='amount'>To: </FormLabel>
         <InputGroup marginBottom='4'>
@@ -186,7 +214,7 @@ export default function Convert(props:Props){
         {slippageComponent}
         {deadlineComponent}
         <Button type="submit" isDisabled={!currentAccount || !input || !isAddress(toAddress)} isLoading={isTransferring} loadingText='Transferring'>Transfer</Button>
-        <Button onClick={handleAdvancedToggleChange} colorScheme='gray' size='sm' variant='link' marginLeft='4'>{advancedToggleText}</Button>
+        <Button onClick={handleAdvancedToggleChange} colorScheme='gray' size='sm' variant='link' marginLeft='4' hidden={inputType != '0'}>{advancedToggleText}</Button>
       </FormControl>
       </form>
 
