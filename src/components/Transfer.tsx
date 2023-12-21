@@ -1,6 +1,6 @@
 // src/component/TransferERC20.tsx
-import React, { useEffect, useState } from 'react'
-import {Alert, AlertIcon, Button, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
+import React, { useState } from 'react'
+import {Alert, Link, AlertIcon, Button, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Stack, InputGroup, Text, InputRightAddon } from '@chakra-ui/react'
 import {BigNumber, ethers} from 'ethers'
 import {formatEther, isAddress, parseEther} from 'ethers/lib/utils'
 import { UtilABI as utilABI } from 'abi/UtilABI'
@@ -27,6 +27,7 @@ interface Props {
     token1Balance: any,
     token0Contract: string,
     token1Contract: string,
+    blockExplorer: string,
     quote: number | undefined,
     queryBaseBalance: () => void,
     queryToken0Balance: () => void,
@@ -44,6 +45,7 @@ export default function Convert(props:Props){
   const token1Balance = Number(props.token1Balance ?? '0');
   const token0Contract = props.token0Contract;
   const token1Contract = props.token1Contract;
+  const blockExplorer = props.blockExplorer;
   var quote = props.quote;
   
   const [inputType, setInputType] = React.useState<string>('0')
@@ -53,6 +55,7 @@ export default function Convert(props:Props){
   const [slippageTolerance,setSlippageTolerance]=useState<string>('0.10')
   const [deadline,setDeadline]=useState<string>('10')
   const [isInvalidInput, setIsInvalidInput]=useState<boolean>(false)
+  const [currentTxHash,setCurrentTxHash]=useState<string>('');
 
   const [isTransferring, setIsTransferring]=useState<boolean>(false)
   const { isOpen: isOpenModal, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
@@ -93,6 +96,7 @@ export default function Convert(props:Props){
       }
       setIsTransferring(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
+      setCurrentTxHash(tr.hash);
       const receipt: TransactionReceipt = await tr.wait();
       console.log("transfer receipt",receipt);
       if (inputType == '0') {
@@ -102,7 +106,7 @@ export default function Convert(props:Props){
       } else {
         props.queryToken1Balance();
       }
-      clearAmounts();
+      clearFields();
       onCloseModal();
     } catch (e:any) {
       console.error(e);
@@ -111,9 +115,10 @@ export default function Convert(props:Props){
     }
   }
 
-  function clearAmounts() {
+  function clearFields() {
     setInput("")
     setIsInvalidInput(false)
+    setToAddress("")
   }
 
   function onInputTypeChange(value:string) {
@@ -212,6 +217,9 @@ export default function Convert(props:Props){
         {deadlineComponent}
         <Button type="submit" isDisabled={!currentAccount || !input || !isAddress(toAddress)} isLoading={isTransferring} loadingText='Transferring'>Transfer</Button>
         <Button onClick={handleAdvancedToggleChange} colorScheme='gray' size='sm' variant='link' marginLeft='4' hidden={inputType != '0'}>{advancedToggleText}</Button>
+        <Text marginTop="4" hidden={!isTransferring}>
+          View transaction: <Link color='blue.500' href={`${blockExplorer}tx/${currentTxHash}`} isExternal>{currentTxHash.substring(0,30)}...</Link>
+        </Text>
       </FormControl>
       </form>
 

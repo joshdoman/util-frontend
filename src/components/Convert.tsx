@@ -1,6 +1,6 @@
 // src/component/TransferERC20.tsx
 import React, { useEffect, useState } from 'react'
-import {Alert, AlertDescription, AlertIcon, Box, Button, CloseButton, Input , NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
+import {Alert, AlertIcon, Link, Button, NumberInput,  NumberInputField,  FormControl,  FormLabel, Radio, RadioGroup, Spinner, Stack, InputGroup, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Text, InputRightAddon } from '@chakra-ui/react'
 import {BigNumber, ethers} from 'ethers'
 import {parseEther} from 'ethers/lib/utils'
 import { UtilABI as utilABI } from 'abi/UtilABI'
@@ -25,6 +25,7 @@ interface Props {
     currentAccount: string | undefined,
     token0Balance: any,
     token1Balance: any,
+    blockExplorer: string,
     queryOverallState: () => void,
     queryToken0Balance: () => void,
     queryToken1Balance: () => void,
@@ -40,6 +41,7 @@ export default function Convert(props:Props){
   const currentAccount = props.currentAccount;
   const token0Balance = Number(props.token0Balance ?? '0');
   const token1Balance = Number(props.token1Balance ?? '0');
+  const blockExplorer = props.blockExplorer;
   
   const [inputType, setInputType] = React.useState('1')
   const [outputType, setOutputType] = React.useState('0')
@@ -53,6 +55,7 @@ export default function Convert(props:Props){
   const [isInvalidOutput, setIsInvalidOutput]=useState<boolean>(false)
   const [estimatedPriceImpact, setEstimatedPriceImpact]=useState<number | undefined>()
   const [interestRateImpact, setInterestRateImpact]=useState<number | undefined>()
+  const [currentTxHash,setCurrentTxHash]=useState<string>('');
 
   const [isSwapping, setIsSwapping]=useState<boolean>(false)
   const { isOpen: isOpenSwapModal, onOpen: onOpenSwapModal, onClose: onCloseSwapModel } = useDisclosure()
@@ -176,6 +179,7 @@ export default function Convert(props:Props){
         const tr: TransactionResponse = await util.swapExactTokensForTokens(input0, inputAmount, minOutputAmount, currentAccount, deadline, { gasLimit: Math.ceil(gasEstimated.toNumber() * gasMargin) });
         setIsSwapping(true);
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
+        setCurrentTxHash(tr.hash);
         const receipt: TransactionReceipt = await tr.wait();
         console.log("swap receipt",receipt);
         props.queryToken0Balance();
@@ -316,6 +320,9 @@ export default function Convert(props:Props){
         {deadlineComponent}
         <Button type="submit" isDisabled={!currentAccount || !output || Number(input) > inputBalance} isLoading={isSwapping} loadingText='Swapping'>Swap</Button>
         <Button onClick={handleAdvancedToggleChange} colorScheme='gray' size='sm' variant='link' marginLeft='4'>{advancedToggleText}</Button>
+        <Text marginTop="4" hidden={!isSwapping}>
+          View transaction: <Link color='blue.500' href={`${blockExplorer}tx/${currentTxHash}`} isExternal>{currentTxHash.substring(0,30)}...</Link>
+        </Text>
       </FormControl>
       </form>
 

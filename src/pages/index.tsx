@@ -64,6 +64,8 @@ const Home: NextPage = () => {
     setCurrentAccount(undefined)
   }
 
+  const blockExplorer = "https://explorer.testnet.rsk.co/";
+
   const onSwitchToRootstock = async () => {
     console.log("Switch to RSK Testnet")
     if(!window.ethereum) return
@@ -89,7 +91,7 @@ const Home: NextPage = () => {
                     symbol: "tRBTC",
                     decimals: 18
                 },
-                blockExplorerUrls: ["https://explorer.testnet.rsk.co/"]
+                blockExplorerUrls: [blockExplorer]
               },
             ],
           });
@@ -301,6 +303,7 @@ const Home: NextPage = () => {
             currentAccount={currentAccount}
             token0Balance={token0Balance}
             token1Balance={token1Balance}
+            blockExplorer={blockExplorer}
             queryOverallState={queryOverallState}
             queryToken0Balance={queryToken0Balance}
             queryToken1Balance={queryToken1Balance}
@@ -316,6 +319,7 @@ const Home: NextPage = () => {
             token1Symbol={token1Symbol}
             baseSymbol={'tRBTC'}
             baseBalance={baseBalance}
+            blockExplorer={blockExplorer}
             queryOverallState={queryOverallState}
             queryBaseBalance={queryBaseBalance}
             queryToken0Balance={queryToken0Balance}
@@ -335,6 +339,7 @@ const Home: NextPage = () => {
             token1Balance={token1Balance}
             token0Contract={token0}
             token1Contract={token1}
+            blockExplorer={blockExplorer}
             quote={quote}
             queryBaseBalance={queryBaseBalance}
             queryToken0Balance={queryToken0Balance}

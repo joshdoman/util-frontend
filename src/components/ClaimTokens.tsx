@@ -1,6 +1,6 @@
 // src/component/TransferERC20.tsx
 import React, { useEffect, useState } from 'react'
-import { Button, NumberInput,  NumberInputField,  FormControl, InputGroup, Text, InputRightAddon, Stack } from '@chakra-ui/react'
+import { Button, NumberInput,  NumberInputField,  FormControl, InputGroup, Text, InputRightAddon, Stack, Link } from '@chakra-ui/react'
 import {ethers} from 'ethers'
 import {formatEther, parseEther} from 'ethers/lib/utils'
 import { UtilABI as utilABI } from 'abi/UtilABI'
@@ -13,6 +13,7 @@ interface Props {
     token1Symbol: string,
     baseSymbol: string,
     baseBalance: any,
+    blockExplorer: string,
     queryOverallState: () => void,
     queryBaseBalance: () => void,
     queryToken0Balance: () => void,
@@ -28,12 +29,14 @@ export default function ClaimTokens(props:Props) {
   const token1Symbol = props.token1Symbol;
   const baseSymbol = props.baseSymbol;
   const baseBalance = Number(props.baseBalance ?? '0');
+  const blockExplorer = props.blockExplorer;
 
   const [bidAmount,setBidAmount]=useState<string>('0');
   const [mintableToken0,setMintableToken0]=useState<number>(0);
   const [mintableToken1,setMintableToken1]=useState<number>(0);
   const [currentBid,setCurrentBid]=useState<number>(0);
   const [currentBidder,setCurrentBidder]=useState<string>('N/A');
+  const [currentTxHash,setCurrentTxHash]=useState<string>('');
 
   const [nextMintDate,setNextMintDate]=useState<Date>(new Date(0))
   const [isEnding, setIsEnding]=useState<boolean>(false)
@@ -85,6 +88,7 @@ export default function ClaimTokens(props:Props) {
       const tr: TransactionResponse = await util.settle();
       setIsEnding(true);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
+      setCurrentTxHash(tr.hash);
       const receipt: TransactionReceipt = await tr.wait();
       await queryMintableAmount();
       await queryBidder();
@@ -109,6 +113,7 @@ export default function ClaimTokens(props:Props) {
       const value = parseEther(bidAmount);
       const tr: TransactionResponse = await util.bid({ value: value });
       setIsBidding(true);
+      setCurrentTxHash(tr.hash);
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
       await queryBidder();
@@ -158,6 +163,9 @@ export default function ClaimTokens(props:Props) {
         <Button marginRight="2" isDisabled={!enableBid} isLoading={isBidding} loadingText='Bidding' onClick={bid}>Bid</Button>
         <Button type="submit" isDisabled={!enableMint} isLoading={isEnding} loadingText={submittingText}>{submitButtonText}</Button>
         <br/>
+        <Text marginTop="4" hidden={!isBidding && !isEnding}>
+          View transaction: <Link color='blue.500' href={`${blockExplorer}tx/${currentTxHash}`} isExternal>{currentTxHash.substring(0,30)}...</Link>
+        </Text>
       </FormControl>
       </form>
     </div>
