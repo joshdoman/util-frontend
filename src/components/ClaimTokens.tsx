@@ -12,6 +12,10 @@ interface Props {
     token0Symbol: string,
     token1Symbol: string,
     gasSymbol: string,
+    queryOverallState: () => void,
+    queryBaseBalance: () => void,
+    queryToken0Balance: () => void,
+    queryToken1Balance: () => void,
 }
 
 declare let window: any;
@@ -82,6 +86,9 @@ export default function ClaimTokens(props:Props) {
       const receipt: TransactionReceipt = await tr.wait();
       await queryMintableAmount();
       await queryBidder();
+      props.queryOverallState();
+      props.queryToken0Balance();
+      props.queryToken1Balance();
       console.log("claim receipt",receipt);
     } catch (e:any) {
       console.error(e);
@@ -91,7 +98,6 @@ export default function ClaimTokens(props:Props) {
   }
 
   async function bid(e:React.FormEvent) {
-    console.log("bid");
     e.preventDefault();
     if (!window.ethereum || !utilContract) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -104,6 +110,7 @@ export default function ClaimTokens(props:Props) {
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
       await queryBidder();
+      props.queryBaseBalance()
       console.log("claim receipt",receipt);
     } catch (e:any) {
       console.error(e);

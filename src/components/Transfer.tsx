@@ -22,18 +22,24 @@ interface Props {
     token0Symbol: string,
     token1Symbol: string,
     currentAccount: string | undefined,
+    baseBalance: any,
     token0Balance: any,
     token1Balance: any,
     token0Contract: string,
     token1Contract: string,
     quote: number | undefined,
+    queryBaseBalance: () => void,
+    queryToken0Balance: () => void,
+    queryToken1Balance: () => void,
 }
 
 declare let window: any;
 
 export default function Convert(props:Props){
+  const satsPerBTC = 100000000;
   const utilContract = props.utilContract;
   const currentAccount = props.currentAccount;
+  const baseBalance = Number(props.baseBalance ?? '0') * satsPerBTC;
   const token0Balance = Number(props.token0Balance ?? '0');
   const token1Balance = Number(props.token1Balance ?? '0');
   const token0Contract = props.token0Contract;
@@ -47,25 +53,11 @@ export default function Convert(props:Props){
   const [slippageTolerance,setSlippageTolerance]=useState<string>('0.10')
   const [deadline,setDeadline]=useState<string>('10')
   const [isInvalidInput, setIsInvalidInput]=useState<boolean>(false)
-  const [baseBalance, setBaseBalance]=useState<number>(0)
 
   const [isTransferring, setIsTransferring]=useState<boolean>(false)
   const { isOpen: isOpenModal, onOpen: onOpenModal, onClose: onCloseModal } = useDisclosure()
 
-  const satsPerBTC = 100000000;
   var maxBTCAmount = (Number(input) / (quote ?? 1) / (1 - Number(slippageTolerance) / 100));
-
-  useEffect(() => {
-    queryBalance();
-  }, [currentAccount])
-
-  async function queryBalance() {
-    if(!window.ethereum) return;
-    if(!currentAccount) return;
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const balance = await provider.getBalance(currentAccount);
-    setBaseBalance(Number(formatEther(balance)) * satsPerBTC);
-  }
 
   async function transfer() {
     if(!window.ethereum) return
@@ -103,7 +95,13 @@ export default function Convert(props:Props){
       console.log(`TransactionResponse TX hash: ${tr.hash}`);
       const receipt: TransactionReceipt = await tr.wait();
       console.log("transfer receipt",receipt);
-      queryBalance();
+      if (inputType == '0') {
+        props.queryBaseBalance();
+      } else if (inputType == '1') {
+        props.queryToken0Balance();
+      } else {
+        props.queryToken1Balance();
+      }
       clearAmounts();
       onCloseModal();
     } catch (e:any) {

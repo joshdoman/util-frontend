@@ -16,7 +16,6 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react'
-import { format } from 'path'
 
 interface Props {
     utilContract: string,
@@ -26,6 +25,9 @@ interface Props {
     currentAccount: string | undefined,
     token0Balance: any,
     token1Balance: any,
+    queryOverallState: () => void,
+    queryToken0Balance: () => void,
+    queryToken1Balance: () => void,
 }
 
 declare let window: any;
@@ -176,6 +178,9 @@ export default function Convert(props:Props){
         console.log(`TransactionResponse TX hash: ${tr.hash}`);
         const receipt: TransactionReceipt = await tr.wait();
         console.log("swap receipt",receipt);
+        props.queryToken0Balance();
+        props.queryToken1Balance();
+        props.queryOverallState();
         clearAmounts();
         onCloseSwapModel();
       } catch (e:any) {
@@ -286,7 +291,6 @@ export default function Convert(props:Props){
         <InputRightAddon>{inputSymbol}</InputRightAddon>
         </InputGroup>
         <Stack direction='row'>
-          {/* <Text align='left' fontSize='12' as='i' hidden={!inputValue}>${numberWithCommas(inputValue, 2)}</Text> */}
           <Text align='right' fontSize='12' flexGrow="1">
             Balance: {inputBalance.toFixed(4)}
             <Button onClick={() => setInput(inputBalanceStr)} hidden={inputBalance == 0} colorScheme='blue' size='xs' variant='link' marginLeft={1}>max</Button>
@@ -305,7 +309,6 @@ export default function Convert(props:Props){
             {interestRateImpact && interestRateImpact > 0 ? `Increases interest rate by ${interestRateImpactText}` : 
              interestRateImpact && interestRateImpact < 0 ? `Reduces interest rate by ${interestRateImpactText}` : ''}
           </Text>
-          {/* <Text align='left' fontSize='12' as='i' hidden={!outputValue}>${numberWithCommas(outputValue, 2)} {estimatedPriceImpact && `(${estimatedPriceImpact.toFixed(2)}%)`}</Text> */}
           <Text align='right' fontSize='12' flexGrow="1">Balance: {outputBalance.toFixed(4)}</Text>
         </Stack>
         {invalidOutput}

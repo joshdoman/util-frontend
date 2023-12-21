@@ -16,6 +16,7 @@ import { formatEther } from 'ethers/lib/utils'
 declare let window: any
 
 const Home: NextPage = () => {
+  const [baseBalance, setBaseBalance] = useState<string | undefined>()
   const [token0Balance, setToken0Balance] = useState<string | undefined>()
   const [token1Balance, setToken1Balance] = useState<string | undefined>()
   const [currentAccount, setCurrentAccount] = useState<`0x${string}` | undefined>()
@@ -82,7 +83,7 @@ const Home: NextPage = () => {
               {
                 chainId: '0x1F',
                 chainName: 'RSK Testnet',
-                rpcUrls: ['https://go.getblock.io/59875196128a469d9a0b0334f9b0ac29'],
+                rpcUrls: ['https://public-node.testnet.rsk.co'],
                 nativeCurrency: {
                     name: "tRBTC",
                     symbol: "tRBTC",
@@ -101,10 +102,10 @@ const Home: NextPage = () => {
   }
 
   const isRootstock = chainId == 31
-  const util = isRootstock ? '0xC575167Cf8e9a7eC328A4AFD86087247CD6De1f0' : ''
-  const token0 = isRootstock ? '0xaE5266C05dBE1992720c33D64d9246ca1fee697e' : ''
-  const token1 = isRootstock ? '0xDBA921c5cf8651a1fdEd3CF6Ca104ec89DBC45d4' : ''
-  const library = isRootstock ? '0x78477ECf49B261b39ED3925E0E86386C70fE23eC' : ''
+  const util = isRootstock ? '0xAFAB8a8CA539adeb8C63840D1AD3Db985A3F0126' : ''
+  const token0 = isRootstock ? '0x512A8a847d01F9E6c72462ce8299cF79ad1ab097' : ''
+  const token1 = isRootstock ? '0x23AD1119904c61be486CFA14CFcc4Ceb743b2E51' : ''
+  const library = isRootstock ? '0x3d2758BADb853aa2CA3d84BCD09d232FfCdb5792' : ''
 
   const token0Symbol = 'Tighten'
   const token1Symbol = 'Ease'
@@ -126,10 +127,10 @@ const Home: NextPage = () => {
     const sync = utilContract.filters.Sync();
     provider.on(sync, (reserve0, reserve1, blockTimestampLast, event) => {
         console.log('Sync', { reserve0, reserve1, blockTimestampLast, event })
-        queryData()
+        queryOverallState()
     });
 
-    queryData();
+    queryOverallState();
 
     // remove listener when the component is unmounted
     return () => {
@@ -137,7 +138,7 @@ const Home: NextPage = () => {
     }
   }, [util])
 
-  async function queryData() {
+  async function queryOverallState() {
     if(!window.ethereum) return;
     if(!util) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -164,6 +165,8 @@ const Home: NextPage = () => {
     if(!window.ethereum) return;
     if(!token0 || !token1 || !currentAccount) return;
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    
+
     const token0Contract = new ethers.Contract(token0, erc20ABI, provider);
     const token1Contract = new ethers.Contract(token1, erc20ABI, provider);
 
@@ -191,6 +194,7 @@ const Home: NextPage = () => {
         queryToken1Balance()
     });
 
+    queryBaseBalance();
     queryToken0Balance();
     queryToken1Balance();
 
@@ -202,6 +206,14 @@ const Home: NextPage = () => {
       provider.removeAllListeners(token1From)
     }
   }, [token0, token1, currentAccount])
+
+  async function queryBaseBalance() {
+    if(!window.ethereum) return;
+    if(!currentAccount) return;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const balance = await provider.getBalance(currentAccount);
+    setBaseBalance(formatEther(balance));
+  }
 
   async function queryToken0Balance() {
     if(!window.ethereum) return;
@@ -289,6 +301,9 @@ const Home: NextPage = () => {
             currentAccount={currentAccount}
             token0Balance={token0Balance}
             token1Balance={token1Balance}
+            queryOverallState={queryOverallState}
+            queryToken0Balance={queryToken0Balance}
+            queryToken1Balance={queryToken1Balance}
           />
         </Box>
 
@@ -300,6 +315,10 @@ const Home: NextPage = () => {
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
             gasSymbol={'tRBTC'}
+            queryOverallState={queryOverallState}
+            queryBaseBalance={queryBaseBalance}
+            queryToken0Balance={queryToken0Balance}
+            queryToken1Balance={queryToken1Balance}
           />
         </Box>
 
@@ -310,11 +329,15 @@ const Home: NextPage = () => {
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
             currentAccount={currentAccount}
+            baseBalance={baseBalance}
             token0Balance={token0Balance}
             token1Balance={token1Balance}
             token0Contract={token0}
             token1Contract={token1}
             quote={quote}
+            queryBaseBalance={queryBaseBalance}
+            queryToken0Balance={queryToken0Balance}
+            queryToken1Balance={queryToken1Balance}
           />
         </Box>
       </VStack>
