@@ -1,6 +1,6 @@
 // src/component/TransferERC20.tsx
 import React, { useEffect, useState } from 'react'
-import { Button, NumberInput,  NumberInputField,  FormControl, InputGroup, Text, InputRightAddon } from '@chakra-ui/react'
+import { Button, NumberInput,  NumberInputField,  FormControl, InputGroup, Text, InputRightAddon, Stack } from '@chakra-ui/react'
 import {ethers} from 'ethers'
 import {formatEther, parseEther} from 'ethers/lib/utils'
 import { UtilABI as utilABI } from 'abi/UtilABI'
@@ -11,7 +11,8 @@ interface Props {
     currentAccount: string | undefined,
     token0Symbol: string,
     token1Symbol: string,
-    gasSymbol: string,
+    baseSymbol: string,
+    baseBalance: any,
     queryOverallState: () => void,
     queryBaseBalance: () => void,
     queryToken0Balance: () => void,
@@ -25,7 +26,8 @@ export default function ClaimTokens(props:Props) {
   const currentAccount = props.currentAccount;
   const token0Symbol = props.token0Symbol;
   const token1Symbol = props.token1Symbol;
-  const gasSymbol = props.gasSymbol;
+  const baseSymbol = props.baseSymbol;
+  const baseBalance = Number(props.baseBalance ?? '0');
 
   const [bidAmount,setBidAmount]=useState<string>('0');
   const [mintableToken0,setMintableToken0]=useState<number>(0);
@@ -139,17 +141,20 @@ export default function ClaimTokens(props:Props) {
   return (
     <div>
       <Text marginBottom="4">{formattedMintAt}</Text>
-      <Text>Current bid: {currentBid.toFixed(8)} {gasSymbol}</Text>
+      <Text>Current bid: {currentBid.toFixed(8)} {baseSymbol}</Text>
       <Text>Current bidder: {currentBidder}</Text>
       <Text>Current reward: {mintableToken0.toFixed(4)} {token0Symbol}, {mintableToken1.toFixed(4)} {token1Symbol}</Text>
       <form onSubmit={claim}>
       <FormControl>
-        <InputGroup marginTop="4" marginBottom="4">
+        <InputGroup marginTop="4">
           <NumberInput w='100%' value={bidAmount} min={0} onChange={handleBidChange}>
             <NumberInputField />
           </NumberInput>
-          <InputRightAddon>{gasSymbol}</InputRightAddon>
+          <InputRightAddon>{baseSymbol}</InputRightAddon>
         </InputGroup>
+        <Stack direction='row'>
+          <Text align='right' fontSize='12' flexGrow="1">Balance: {baseBalance.toFixed(8)}</Text>
+        </Stack>
         <Button marginRight="2" isDisabled={!enableBid} isLoading={isBidding} loadingText='Bidding' onClick={bid}>Bid</Button>
         <Button type="submit" isDisabled={!enableMint} isLoading={isEnding} loadingText={submittingText}>{submitButtonText}</Button>
         <br/>

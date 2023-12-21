@@ -314,7 +314,8 @@ const Home: NextPage = () => {
             currentAccount={currentAccount}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
-            gasSymbol={'tRBTC'}
+            baseSymbol={'tRBTC'}
+            baseBalance={baseBalance}
             queryOverallState={queryOverallState}
             queryBaseBalance={queryBaseBalance}
             queryToken0Balance={queryToken0Balance}
