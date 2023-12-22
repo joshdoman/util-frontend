@@ -269,14 +269,14 @@ const Home: NextPage = () => {
           : <></>
         }
 
-          {chainId && !isRootstock ?
-            <Box w='100%' my={4}>
-              <Button type="button" onClick={onSwitchToRootstock}>
-                Switch to RSK Testnet
-              </Button>
-            </Box>
-            : <></>
-          }
+        {chainId && !isRootstock ?
+          <Box w='100%' my={4}>
+            <Button type="button" onClick={onSwitchToRootstock}>
+              Switch to RSK Testnet
+            </Button>
+          </Box>
+          : <></>
+        } 
 
         <Box  mb={0} p={4} w='100%' borderWidth="1px" borderRadius="lg">
           <Heading my={4}  fontSize='xl'>Overview</Heading>
