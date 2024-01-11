@@ -104,10 +104,10 @@ const Home: NextPage = () => {
   }
 
   const isRootstock = chainId == 31
-  const util = isRootstock ? '0xAFAB8a8CA539adeb8C63840D1AD3Db985A3F0126' : ''
-  const token0 = isRootstock ? '0x512A8a847d01F9E6c72462ce8299cF79ad1ab097' : ''
-  const token1 = isRootstock ? '0x23AD1119904c61be486CFA14CFcc4Ceb743b2E51' : ''
-  const library = isRootstock ? '0x3d2758BADb853aa2CA3d84BCD09d232FfCdb5792' : ''
+  const util = isRootstock ? '0xA42aC7990264CFBAED4691A983d9E9F75609B53d' : ''
+  const token0 = isRootstock ? '0x6dC4398d83999473C9F7068f6c5A3583ea0834BA' : ''
+  const token1 = isRootstock ? '0xeb2f1A73899C6b89cD7e2a840C864bb986EFBf02' : ''
+  const library = isRootstock ? '0x9E26a8753D70292c765907232958947A40049867' : ''
 
   const token0Symbol = 'Tighten'
   const token1Symbol = 'Ease'
