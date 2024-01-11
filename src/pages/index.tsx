@@ -22,6 +22,7 @@ const Home: NextPage = () => {
   const [currentAccount, setCurrentAccount] = useState<`0x${string}` | undefined>()
   const [chainId, setChainId] = useState<number | undefined>()
   const [walletInstalled, setWalletInstalled] = useState<boolean>(false)
+  const [walletUnfunded, setWalledUnfunded] = useState<boolean>(false)
 
   useEffect(() => {
     if(!window.ethereum) return
@@ -215,6 +216,7 @@ const Home: NextPage = () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const balance = await provider.getBalance(currentAccount);
     setBaseBalance(formatEther(balance));
+    setWalledUnfunded(balance.eq(0));
   }
 
   async function queryToken0Balance() {
@@ -273,6 +275,15 @@ const Home: NextPage = () => {
           <Box w='100%' my={4}>
             <Button type="button" onClick={onSwitchToRootstock}>
               Switch to RSK Testnet
+            </Button>
+          </Box>
+          : <></>
+        } 
+
+        {chainId && isRootstock && currentAccount && walletInstalled && walletUnfunded ?
+          <Box w='100%' my={4}>
+            <Button type="button" colorScheme='blue' onClick={() => window.open("https://faucet.rsk.co/")}>
+              Launch Faucet
             </Button>
           </Box>
           : <></>
