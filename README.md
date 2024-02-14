@@ -1,4 +1,4 @@
-A frontend for interacting with a Solidity implementation of [the Util protocol](https://github.com/joshdoman/util-solidity). A version deployed on the Rootstock testnet network is available at [https://testnet.theutil.org](https://testnet.theutil.org).
+A frontend for interacting with [the Util protocol](https://github.com/joshdoman/util-solidity). A live version is available at [https://app.theutil.org](https://app.theutil.org).
 
 ## Getting Started
 
@@ -17,6 +17,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Follow the steps below to use the application:
 1. Open the application in Chrome
 2. Install the Metamask Chrome Extension
-3. Switch to the RSK Testnet network by pressing "Switch to RSK Testnet"
-4. Obtain tRBTC from the RSK Testnet [faucet](https://faucet.rootstock.io/)
+3. Switch to the RSK network by pressing "Switch to RSK"
+4. Obtain RBTC in order to pay gas
 5. Claim Tighten and Ease via the auction mechanism
