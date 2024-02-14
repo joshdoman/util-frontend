@@ -270,7 +270,7 @@ const Home: NextPage = () => {
           <Box w='100%' my={4}>
             <Alert status='warning'>
               <AlertIcon />
-              Currently available only on RSK Testnet. Please switch network on Metamask.
+              Currently available only on RSK. Please switch network on Metamask.
             </Alert>
           </Box>
           : <></>
@@ -279,7 +279,7 @@ const Home: NextPage = () => {
         {chainId && !isRootstock ?
           <Box w='100%' my={4}>
             <Button type="button" onClick={onSwitchToRootstock}>
-              Switch to RSK Testnet
+              Switch to RSK
             </Button>
           </Box>
           : <></>
