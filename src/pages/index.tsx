@@ -58,23 +58,28 @@ const Home: NextPage = () => {
       if(accounts.length>0) setCurrentAccount(accounts[0])
     })
     .catch((e)=>console.log(e))
+
+    window.ethereum.on('accountsChanged', (accounts: any) => {
+      // Reload with current account
+      if(accounts.length>0) setCurrentAccount(accounts[0])
+     });
   }
 
   const onClickDisconnect = () => {
-    console.log("onClickDisConnect")
     setCurrentAccount(undefined)
   }
 
-  const blockExplorer = "https://explorer.testnet.rsk.co/";
+  const baseSymbol = 'RBTC'
+  const blockExplorer = "https://explorer.rsk.co/";
 
   const onSwitchToRootstock = async () => {
-    console.log("Switch to RSK Testnet")
+    console.log("Switch to RSK")
     if(!window.ethereum) return
     try {
       // Try to switch to Rootstock network
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x1F'  }],
+        params: [{ chainId: '0x1E'  }],
       })
     } catch (error:any) {
       // Rootstock has not been added to MetaMask, so ask user to add it
@@ -84,12 +89,12 @@ const Home: NextPage = () => {
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0x1F',
-                chainName: 'RSK Testnet',
-                rpcUrls: ['https://public-node.testnet.rsk.co'],
+                chainId: '0x1E',
+                chainName: 'RSK',
+                rpcUrls: ['https://public-node.rsk.co'],
                 nativeCurrency: {
-                    name: "tRBTC",
-                    symbol: "tRBTC",
+                    name: baseSymbol,
+                    symbol: baseSymbol,
                     decimals: 18
                 },
                 blockExplorerUrls: [blockExplorer]
@@ -104,11 +109,11 @@ const Home: NextPage = () => {
     }
   }
 
-  const isRootstock = chainId == 31
-  const util = isRootstock ? '0xA42aC7990264CFBAED4691A983d9E9F75609B53d' : ''
-  const token0 = isRootstock ? '0x6dC4398d83999473C9F7068f6c5A3583ea0834BA' : ''
-  const token1 = isRootstock ? '0xeb2f1A73899C6b89cD7e2a840C864bb986EFBf02' : ''
-  const library = isRootstock ? '0x9E26a8753D70292c765907232958947A40049867' : ''
+  const isRootstock = chainId == 30
+  const util = isRootstock ? '0x4EA0822cd31A282FCaBAAD5CA936eF3b2DED8a35' : ''
+  const token0 = isRootstock ? '0x1251a055cF4ABEFcacc85D39Ed14E8E203c0d380' : ''
+  const token1 = isRootstock ? '0xf45D63eD1496Cb4073c0acAf31c58A9ad799B41C' : ''
+  const library = isRootstock ? '0x388882FD892Ef043311Ce2DA54A8cEbcBB37A3F5' : ''
 
   const token0Symbol = 'Tighten'
   const token1Symbol = 'Ease'
@@ -282,8 +287,8 @@ const Home: NextPage = () => {
 
         {chainId && isRootstock && currentAccount && walletInstalled && walletUnfunded ?
           <Box w='100%' my={4}>
-            <Button type="button" colorScheme='blue' onClick={() => window.open("https://faucet.rsk.co/")}>
-              Launch Faucet
+            <Button type="button" colorScheme='blue' onClick={() => window.open("https://blog.rootstock.io/noticia/smart-bitcoin-3-easy-ways-to-get-rbtc/")}>
+              Acquire RBTC
             </Button>
           </Box>
           : <></>
@@ -328,7 +333,7 @@ const Home: NextPage = () => {
             currentAccount={currentAccount}
             token0Symbol={token0Symbol}
             token1Symbol={token1Symbol}
-            baseSymbol={'tRBTC'}
+            baseSymbol={baseSymbol}
             baseBalance={baseBalance}
             blockExplorer={blockExplorer}
             queryOverallState={queryOverallState}

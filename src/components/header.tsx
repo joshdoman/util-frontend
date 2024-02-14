@@ -2,7 +2,7 @@
 import NextLink from "next/link"
 import { Flex, useColorModeValue, Heading, LinkBox, LinkOverlay } from '@chakra-ui/react'
 
-const siteTitle="Util Testnet"
+const siteTitle="Util Mainnet"
 export default function Header() {  
 
   return (
