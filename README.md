@@ -11,3 +11,12 @@ yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Setup
+
+Follow the steps below to use the application:
+1. Open the application in Chrome
+2. Install the Metamask Chrome Extension
+3. Switch to the RSK Testnet network by pressing "Switch to RSK Testnet"
+4. Obtain tRBTC from the RSK Testnet [faucet](https://faucet.rootstock.io/)
+5. Claim Tighten and Ease via the auction mechanism
